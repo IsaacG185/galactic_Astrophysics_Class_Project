@@ -22,21 +22,21 @@ import astropy.units as u
 import numpy as np
 
 # Load K-Dwarf sample from 1_Data_Acquisition
-kdwarfs = Table.read("gaia_KDwarfs.fits")
+kdwarfs = Table.read("[1]_Gaia_KDwarfs.fits")
 
-ra    = np.array(kdwarfs["ra"],              dtype=float)  # deg
-dec   = np.array(kdwarfs["dec"],             dtype=float)  # deg
-plx   = np.array(kdwarfs["parallax"],        dtype=float)  # mas
-pmra  = np.array(kdwarfs["pmra"],            dtype=float)  # mas/yr (includes cos dec)
-pmdec = np.array(kdwarfs["pmdec"],           dtype=float)  # mas/yr
-rv    = np.array(kdwarfs["radial_velocity"], dtype=float)  # km/s
+ra    = np.array(kdwarfs["ra"],dtype=float)  # deg
+dec   = np.array(kdwarfs["dec"], dtype=float)  # deg
+plx   = np.array(kdwarfs["parallax"],dtype=float)  # mas
+pmra  = np.array(kdwarfs["pmra"],dtype=float)  # mas/yr (includes cos dec)
+pmdec = np.array(kdwarfs["pmdec"],dtype=float)  # mas/yr
+rv    = np.array(kdwarfs["radial_velocity"],dtype=float)  # km/s
 
 # varpi [mas] -> d [pc]
 d_pc = 1000.0 / plx  # pc
 
 # Solar parameters
-R_sun = 8.122 * u.kpc        # Galactocentric distance (Reid et al. 2019)
-z_sun = 20.8  * u.pc         # Height above midplane (Bennett & Bovy 2019)
+R_sun = 8.122 * u.kpc # Galactocentric distance (Reid et al. 2019)
+z_sun = 20.8  * u.pc # Height above midplane (Bennett & Bovy 2019)
 v_sun = coord.CartesianDifferential([11.1, 232.24, 7.25] * u.km / u.s)
 # (U, V_circ + V_pec, W) = (11.1, 220.0 + 12.24, 7.25) km/s
 # Schoenrich, Binney & Dehnen 2010; V_LSR = 220 km/s folded into Y-component
@@ -92,8 +92,8 @@ kdwarfs["vZ_gc"] = vZ
 kdwarfs["v_z"]   = v_z
 kdwarfs["d_pc"]  = d_pc
 
-kdwarfs.write("gaia_Kdwarfs_6D.fits", format="fits", overwrite=True)
-print("\nSaved 6-D Galactocentric sample -> 'gaia_KDwarfs_6D.fits'")
+kdwarfs.write("[2]_Gaia_Kdwarfs_6D.fits",format="fits",overwrite=True)
+print("\nSaved 6-D Galactocentric sample -> '[2]_Gaia_KDwarfs_6D.fits'")
 
 # [Uncertainty Propogation]
 # For each star, draw N_MC realisations from the multivariate Gaussian defined
@@ -104,10 +104,10 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import time
 
-e_plx   = np.array(kdwarfs["parallax_error"],        dtype=float)
-e_pmra  = np.array(kdwarfs["pmra_error"],             dtype=float)
-e_pmdec = np.array(kdwarfs["pmdec_error"],            dtype=float)
-e_rv    = np.array(kdwarfs["radial_velocity_error"],  dtype=float)
+e_plx = np.array(kdwarfs["parallax_error"],dtype=float)
+e_pmra = np.array(kdwarfs["pmra_error"],dtype=float)
+e_pmdec = np.array(kdwarfs["pmdec_error"],dtype=float)
+e_rv = np.array(kdwarfs["radial_velocity_error"],dtype=float)
 N_STARS = len(kdwarfs)
 
 try:
@@ -178,8 +178,8 @@ kdwarfs["z_mc_std"]  = z_std
 kdwarfs["vz_mc_med"] = vz_med
 kdwarfs["vz_mc_std"] = vz_std
 
-kdwarfs.write("gaia_KDwarfs_6D.fits", format="fits", overwrite=True)
-print("\nSaved -> 'gaia_KDwarfs_6D.fits'  (includes MC uncertainty columns)")
+kdwarfs.write("[2]_Gaia_KDwarfs_6D.fits", format="fits", overwrite=True)
+print("\nSaved -> '[2]_Gaia_KDwarfs_6D.fits'  (includes MC uncertainty columns)")
 
 # Plots
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
@@ -228,6 +228,123 @@ ax3.legend(lines1 + lines2, labels1 + labels2, fontsize=9,
 plt.suptitle("Monte Carlo Uncertainty Propagation - Gaia DR3 K Dwarfs",
              fontsize=13, fontweight="bold", color="white", y=1.01)
 plt.tight_layout()
-plt.savefig("uncertainty_Propagation.png", dpi=150, bbox_inches="tight", facecolor="#0d1117")
+plt.savefig("[2]_Uncertainty_Propagation.png", dpi=150, bbox_inches="tight", facecolor="#0d1117")
 plt.show()
-print("Plot saved -> 'uncertainty_Propagation.png'")
+print("Plot saved -> '[2]_Uncertainty_Propagation.png'")
+
+# [Measuring Density and Dispersion]
+
+# We bin stars in vertical height z and compute:
+#
+#   ν(z) ≈ N(z) / V(z)
+#
+# where N(z) is the number of stars in a bin and V(z) is the effective survey volume.
+# In this analysis, we approximate ν(z) ∝ N(z), i.e. we neglect detailed modeling of
+# the selection function and volume geometry, and treat star counts as a proxy for
+# the vertical density profile up to a constant normalization.
+#
+# Justification:
+#   - The sample is local (d < 1.5 kpc) and approximately all-sky.
+#   - We are primarily interested in the SHAPE of ν(z), not its absolute normalization.
+#   - The normalization cancels in the Jeans equation when computing derivatives.
+#
+# We assume symmetry about the Galactic midplane and use |z|.
+#
+# The vertical velocity dispersion is computed as:
+#
+#   σ_z^2(z) = <v_z^2> - <v_z>^2
+#
+# Bootstrap resampling is used to estimate uncertainties.
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Use MC medians (robust against measurement noise)
+z  = kdwarfs["z_mc_med"]
+vz = kdwarfs["vz_mc_med"]
+
+# Symmetry about the midplane
+z_abs = np.abs(z)
+
+# Define z bins (tunable; will test sensitivity later)
+z_bins = np.linspace(0, 1500, 25)  # pc
+z_centers = 0.5 * (z_bins[:-1] + z_bins[1:])
+
+nu = []             # density proxy
+sigma_z = []        # velocity dispersion
+nu_err = []         # bootstrap uncertainty
+sigma_z_err = []
+
+N_boot = 200  # bootstrap resamples
+
+for i in range(len(z_bins) - 1):
+    in_bin = (z_abs >= z_bins[i]) & (z_abs < z_bins[i+1])
+    
+    vz_bin = vz[in_bin]
+    N = len(vz_bin)
+    
+    # Require minimum number of stars for stability
+    if N < 10:
+        nu.append(np.nan)
+        sigma_z.append(np.nan)
+        nu_err.append(np.nan)
+        sigma_z_err.append(np.nan)
+        continue
+    
+    # Density proxy
+    nu.append(N)
+    
+    # Velocity dispersion
+    mean_vz = np.mean(vz_bin)
+    var_vz = np.mean(vz_bin**2) - mean_vz**2
+    sigma = np.sqrt(var_vz)
+    sigma_z.append(sigma)
+    
+    # Bootstrap
+    nu_boot = []
+    sig_boot = []
+    
+    for _ in range(N_boot):
+        sample = np.random.choice(vz_bin, size=N, replace=True)
+        
+        nu_boot.append(len(sample))
+        
+        m = np.mean(sample)
+        v = np.mean(sample**2) - m**2
+        sig_boot.append(np.sqrt(v))
+    
+    nu_err.append(np.std(nu_boot))
+    sigma_z_err.append(np.std(sig_boot))
+
+# Convert to arrays
+nu = np.array(nu)
+sigma_z = np.array(sigma_z)
+nu_err = np.array(nu_err)
+sigma_z_err = np.array(sigma_z_err)
+
+print("\nDensity/dispersion measurement complete.")
+print(f"Number of z bins: {len(z_centers)}")
+print(f"Median σ_z: {np.nanmedian(sigma_z):.2f} km/s")
+
+# Plot results
+fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+# Density profile
+ax[0].errorbar(z_centers, nu, yerr=nu_err, fmt='o', markersize=4)
+ax[0].set_xlabel("z [pc]")
+ax[0].set_ylabel("Star counts (proxy for ν(z))")
+ax[0].set_title("Vertical Density Profile")
+ax[0].grid(alpha=0.3)
+
+# Velocity dispersion profile
+ax[1].errorbar(z_centers, sigma_z, yerr=sigma_z_err, fmt='o', markersize=4)
+ax[1].set_xlabel("z [pc]")
+ax[1].set_ylabel("σ_z [km/s]")
+ax[1].set_title("Vertical Velocity Dispersion")
+ax[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.savefig("[2]_Density_dispersion.png", dpi=150)
+plt.show()
+
+print("Plot saved -> '[2]_Density_Dispersion.png'")

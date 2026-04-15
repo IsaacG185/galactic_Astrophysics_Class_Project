@@ -56,8 +56,8 @@ print(result.colnames)
 print(result[:5])
 
 # Save to FITS and read back
-result.write("gaia_Data.fits", format="fits")
-r = Table.read("gaia_Data.fits")
+result.write("[1]_Gaia_Data.fits", format="fits")
+r = Table.read("[1]_Gaia_Data.fits")
 print(r)
 
 # Data Cleaning, mask any rows with NaN in critical columns 
@@ -116,7 +116,7 @@ ax.xaxis.set_minor_locator(ticker.MultipleLocator(0.1))
 ax.grid(axis="y", which="major", linestyle="--", linewidth=0.5, alpha=0.4)
 
 plt.tight_layout()
-plot_path = "ruwe_Distribution.png"
+plot_path = "[1]_Ruwe_Distribution.png"
 plt.savefig(plot_path, dpi=150)
 plt.show()
 print(f"Plot saved to '{plot_path}'")
@@ -136,8 +136,8 @@ print(f"  Before : {n_before:>7,} stars")
 print(f"  Removed: {n_removed:>7,} stars  ({100 * n_removed / n_before:.2f} %)")
 print(f"  After  : {n_after:>7,} stars  (RUWE < {RUWE_THRESHOLD})")
 
-clean_ruwe.write("gaia_Ruwe_Clean.fits", format="fits", overwrite=True)
-print(f"\nSaved astrometrically clean sample → 'gaia_Ruwe_Clean.fits'")
+clean_ruwe.write("[1]_Gaia_Ruwe_Clean.fits", format="fits", overwrite=True)
+print(f"\nSaved astrometrically clean sample → '[1]_Gaia_Ruwe_Clean.fits'")
 
 # Gaia's astrometric pipeline fits a 5-parameter model (ra, dec,
 # parallax, pmra, pmdec) to each star's along-scan observations.
@@ -179,7 +179,7 @@ import matplotlib.ticker as ticker
 from matplotlib.colors import LogNorm
 
 # Load cleaned data
-clean_ruwe = Table.read("gaia_Ruwe_Clean.fits")
+clean_ruwe = Table.read("[1]_Gaia_Ruwe_Clean.fits")
 
 # Compute absolute G magnitude using parallax in mas
 # M_G = G + 5*log10(parallax / 1000) + 5
@@ -203,10 +203,10 @@ print(f"K-dwarf candidates: {n_kdwarf:,}")
 # Save K-dwarf subsample as fits file, gaia_Kdwarfs.fits
 kdwarfs = clean_ruwe[kdwarf_mask]
 kdwarfs["M_G"] = M_G[kdwarf_mask]
-kdwarfs.write("gaia_Kdwarfs.fits", format="fits", overwrite=True)
-print("Saved K-dwarf sample -> 'gaia_Kdwarfs.fits'")
+kdwarfs.write("[2]_Gaia_Kdwarfs.fits", format="fits", overwrite=True)
+print("Saved K-dwarf sample -> '[2]_Gaia_Kdwarfs.fits'")
 
-# --- Color-Magnitude Diagram ---
+# Color-Magnitude Diagram
 fig, ax = plt.subplots(figsize=(8, 9))
 fig.patch.set_facecolor("#0d1117")
 ax.set_facecolor("#0d1117")
@@ -253,14 +253,14 @@ ax.annotate(
 )
 
 # Colorbar
-cbar = fig.colorbar(h[3], ax=ax, pad=0.02, fraction=0.035)
-cbar.set_label("Stars per bin (log scale)", fontsize=10, color="white")
+cbar = fig.colorbar(h[3],ax=ax,pad=0.02,fraction=0.035)
+cbar.set_label("Stars per bin (log scale)",fontsize=10,color="white")
 cbar.ax.yaxis.set_tick_params(color="white")
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color="white")
 
 # Labels & styling
-ax.set_xlabel(r"$G_{BP} - G_{RP}$  [mag]", fontsize=13, color="white")
-ax.set_ylabel(r"$M_G$  [mag]",             fontsize=13, color="white")
+ax.set_xlabel(r"$G_{BP} - G_{RP}$  [mag]",fontsize=13,color="white")
+ax.set_ylabel(r"$M_G$  [mag]",fontsize=13,color="white")
 ax.set_title(
     "Color-Magnitude Diagram - Gaia DR3 Local Sample\nTracer Selection: K Dwarfs",
     fontsize=13, fontweight="bold", color="white", pad=10,
@@ -277,9 +277,9 @@ ax.grid(which="major", linestyle="--", linewidth=0.4, color="#333", zorder=0)
 ax.legend(fontsize=9, facecolor="#1a1f2b", edgecolor="#444", labelcolor="white", loc="upper left")
 
 plt.tight_layout()
-plt.savefig("tracer_Selection_CMD.png", dpi=180, bbox_inches="tight", facecolor="#0d1117")
+plt.savefig("[1]_Tracer_Selection_CMD.png", dpi=180, bbox_inches="tight", facecolor="#0d1117")
 plt.show()
-print("Plot saved -> 'tracer_Selection_CMD.png'")
+print("Plot saved -> '[1]_Tracer_Selection_CMD.png'")
 
 # Need to write justification separately for the report.
 # K dwarfs chosen because:\n,  Long-lived (tau >> disk age) -> sample full disk history\n, Numerous -> good statistics per z-bin\n
