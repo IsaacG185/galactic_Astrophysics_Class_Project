@@ -45,7 +45,7 @@ WHERE
 # Query to Gaia using astroquery.gaia
 job = Gaia.launch_job_async(
     query=gaia_Query,
-    name="local_stars", # Optional
+    name="local_Stars", # Optional
     verbose=True # optional
 )
 
@@ -203,8 +203,8 @@ print(f"K-dwarf candidates: {n_kdwarf:,}")
 # Save K-dwarf subsample as fits file, gaia_Kdwarfs.fits
 kdwarfs = clean_ruwe[kdwarf_mask]
 kdwarfs["M_G"] = M_G[kdwarf_mask]
-kdwarfs.write("[2]_Gaia_Kdwarfs.fits", format="fits", overwrite=True)
-print("Saved K-dwarf sample -> '[2]_Gaia_Kdwarfs.fits'")
+kdwarfs.write("[1]_Gaia_Kdwarfs.fits", format="fits", overwrite=True)
+print("Saved K-dwarf sample -> '[1]_Gaia_Kdwarfs.fits'")
 
 # Color-Magnitude Diagram
 fig, ax = plt.subplots(figsize=(8, 9))
@@ -258,7 +258,7 @@ cbar.set_label("Stars per bin (log scale)",fontsize=10,color="white")
 cbar.ax.yaxis.set_tick_params(color="white")
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color="white")
 
-# Labels & styling
+# Labels and styling
 ax.set_xlabel(r"$G_{BP} - G_{RP}$  [mag]",fontsize=13,color="white")
 ax.set_ylabel(r"$M_G$  [mag]",fontsize=13,color="white")
 ax.set_title(

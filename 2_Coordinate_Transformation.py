@@ -348,3 +348,10 @@ plt.savefig("[2]_Density_dispersion.png", dpi=150)
 plt.show()
 
 print("Plot saved -> '[2]_Density_Dispersion.png'")
+
+# [Mass Modeling and Statistical Inference]
+
+# [Parameterization of the Mass Model]
+
+# [From Density to Observable Quantities]
+
