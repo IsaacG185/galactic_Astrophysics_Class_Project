@@ -1,7 +1,7 @@
 {
     "python-envs.pythonProjects": [
         {
-            "path": "1_Data_Acquisition.py",
+            "path": "[1]_Data_Acquisition.py",
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         }
