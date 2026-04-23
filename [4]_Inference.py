@@ -19,7 +19,7 @@ import matplotlib.ticker as ticker
 import emcee
 import corner
 
-# ── Reload data and re-define forward model (from [2] and [3]) ───────────────
+# Reloading data and re-define forward model (from [2] and [3])
 
 kdwarfs = Table.read("[2]_Gaia_KDwarfs_6D.fits")
 
@@ -127,7 +127,7 @@ def log_posterior(theta):
         return -np.inf
     return lp + log_likelihood(theta)
 
-# ── MCMC sampling ─────────────────────────────────────────────────────────────
+# MCMC sampling
 #
 # Initial positions: small Gaussian ball around literature-motivated values
 #   rho_thin  ~ 0.10 Msun/pc^3  (Bovy & Rix 2013)
@@ -263,7 +263,7 @@ def quick_rho_DM_fit(z_obs_s, nu_obs_s, sig_obs_s, sig_err_s, theta_med):
     ll_grid = np.array(ll_grid)
     return rho_DM_grid[np.argmax(ll_grid)]
 
-# ── Systematic 1: RUWE threshold ─────────────────────────────────────────────
+# Systematic 1: RUWE threshold 
 from astropy.table import Table as ATable
 
 clean_ruwe_strict = ATable.read("[1]_Gaia_Ruwe_Clean.fits")
@@ -370,7 +370,7 @@ rho_DM_s2 = quick_rho_DM_fit(
 print(f"\nSystematic 2 result (15 bins): rho_DM = {rho_DM_s2:.4f} Msun/pc^3")
 print(f"  Shift from baseline: {rho_DM_s2 - rho_DM_med:+.4f} Msun/pc^3")
 
-# ── Synthetic dataset recovery test ──────────────────────────────────────────
+# Synthetic dataset recovery test
 #
 # Generate a synthetic sigma_z(z) from a known rho_DM_true, add Gaussian
 # noise at the level of sig_err, then run the grid search to verify
@@ -415,7 +415,7 @@ param_labels = [
     r"$\rho_\mathrm{DM}$",
 ]
 
-# ── 1. Chain traces ───────────────────────────────────────────────────────────
+# 1. Chain traces
 samples_chain = sampler.get_chain()   # (N_STEPS, N_WALKERS, N_DIM)
 
 fig_trace, axes_trace = plt.subplots(N_DIM, 1, figsize=(10, 9), sharex=True)
@@ -440,7 +440,7 @@ plt.savefig("[4]_MCMC_Traces.png", dpi=150,
 plt.show()
 print("Saved -> '[4]_MCMC_Traces.png'")
 
-# ── 2. Corner plot ────────────────────────────────────────────────────────────
+# 2. Corner plot 
 fig_corner = corner.corner(
     flat_samples,
     labels=param_labels,
@@ -451,14 +451,14 @@ fig_corner = corner.corner(
     color="#4C8BF5",
 )
 fig_corner.suptitle(
-    r"Posterior corner plot — Jeans model parameters",
+    r"Posterior corner plot - Jeans model parameters",
     fontsize=12, fontweight="bold", y=1.01,
 )
 plt.savefig("[4]_MCMC_Corner.png", dpi=150, bbox_inches="tight")
 plt.show()
 print("Saved -> '[4]_MCMC_Corner.png'")
 
-# ── 3. Posterior predictive check ────────────────────────────────────────────
+# 3. Posterior predictive check
 N_PPC     = 200
 ppc_idx   = np.random.choice(len(flat_samples), size=N_PPC, replace=False)
 
@@ -495,7 +495,7 @@ plt.savefig("[4]_Posterior_Predictive_Check.png", dpi=150,
 plt.show()
 print("Saved -> '[4]_Posterior_Predictive_Check.png'")
 
-# ── 4. rho_DM marginal posterior ─────────────────────────────────────────────
+# 4. rho_DM marginal posterior
 fig_dm, ax_dm = plt.subplots(figsize=(7, 4))
 fig_dm.patch.set_facecolor("#0d1117")
 ax_dm.set_facecolor("#0d1117")

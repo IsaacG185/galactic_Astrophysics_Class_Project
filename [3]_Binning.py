@@ -5,7 +5,7 @@ from astropy.table import Table
 from scipy.integrate import cumulative_trapezoid
 from scipy.interpolate import interp1d
 
-# ── Reload binned profiles saved at the end of [2] ──────────────────────────
+# Reload binned profiles saved at the end of [2]
 # (z_centers, nu, sigma_z, nu_err, sigma_z_err were computed in [2] and
 #  need to be recomputed here from the saved 6D fits file)
 
@@ -55,7 +55,7 @@ nu_obs  = nu[valid]
 sig_obs = sigma_z[valid]
 sig_err = sigma_z_err[valid]
 
-# ── Re-define forward model (originally in [2]) ──────────────────────────────
+# Re-define forward model (originally in [2])
 G_grav   = 4.3009e-3
 RHO_GAS0 = 0.04
 H_GAS    = 150.0

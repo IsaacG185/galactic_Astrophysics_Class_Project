@@ -203,8 +203,8 @@ print(f"K-dwarf candidates: {n_kdwarf:,}")
 # Save K-dwarf subsample as fits file, gaia_Kdwarfs.fits
 kdwarfs = clean_ruwe[kdwarf_mask]
 kdwarfs["M_G"] = M_G[kdwarf_mask]
-kdwarfs.write("[1]_Gaia_Kdwarfs.fits", format="fits", overwrite=True)
-print("Saved K-dwarf sample -> '[1]_Gaia_Kdwarfs.fits'")
+kdwarfs.write("[1]_Gaia_KDwarfs.fits", format="fits", overwrite=True)
+print("Saved K-dwarf sample -> '[1]_Gaia_KDwarfs.fits'")
 
 # Color-Magnitude Diagram
 fig, ax = plt.subplots(figsize=(8, 9))
