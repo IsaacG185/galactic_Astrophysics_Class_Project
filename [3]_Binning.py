@@ -17,10 +17,7 @@ from astropy.table import Table
 from scipy.integrate import cumulative_trapezoid
 from scipy.interpolate import interp1d
 
-
-# ------------------------------------------------------------
 # Reload transformed K-dwarf sample from [2]
-# ------------------------------------------------------------
 
 kdwarfs = Table.read("[2]_Gaia_KDwarfs_6D.fits")
 
@@ -28,10 +25,7 @@ z  = np.array(kdwarfs["z_mc_med"], dtype=float)
 vz = np.array(kdwarfs["vz_mc_med"], dtype=float)
 z_abs = np.abs(z)
 
-
-# ------------------------------------------------------------
 # Recompute volume-corrected density and dispersion profiles
-# ------------------------------------------------------------
 
 z_bins = np.linspace(0, 1500, 25)
 z_centers = 0.5 * (z_bins[:-1] + z_bins[1:])
@@ -95,10 +89,8 @@ sigma_z = np.array(sigma_z)
 nu_err = np.array(nu_err)
 sigma_z_err = np.array(sigma_z_err)
 
-
-# ------------------------------------------------------------
 # Fit only reliable z range
-# ------------------------------------------------------------
+
 # The outer bins are more affected by selection-function uncertainty and
 # thick-disk contamination, so the baseline likelihood uses |z| <= 400 pc.
 
@@ -122,10 +114,7 @@ print(f"Valid bins used in likelihood: {len(z_obs)}")
 print(f"Fit z range: {np.nanmin(z_obs):.2f} to {np.nanmax(z_obs):.2f} pc")
 print(f"Median observed sigma_z: {np.nanmedian(sig_obs):.2f} km/s")
 
-
-# ------------------------------------------------------------
 # Fixed mass model parameters
-# ------------------------------------------------------------
 
 G_grav = 4.3009e-3   # pc Msun^-1 (km/s)^2
 
@@ -222,10 +211,7 @@ def compute_sigma_z_model(
 
     return sigma_fn(z_centers)
 
-
-# ------------------------------------------------------------
 # Likelihood
-# ------------------------------------------------------------
 
 def log_likelihood(theta):
     sigma_top, rho_thin, rho_DM = theta
@@ -251,10 +237,7 @@ def log_likelihood(theta):
         + np.log(2.0 * np.pi * sig_err**2)
     )
 
-
-# ------------------------------------------------------------
 # Prior
-# ------------------------------------------------------------
 
 def log_prior(theta):
     sigma_top, rho_thin, rho_DM = theta
@@ -285,10 +268,7 @@ def log_posterior(theta):
 
     return lp + ll
 
-
-# ------------------------------------------------------------
 # Sanity check
-# ------------------------------------------------------------
 
 sigma_top_test = sig_obs[-1]
 
@@ -308,10 +288,7 @@ print(f"rho_DM_test    = {theta_test[2]:.4f} Msun/pc^3")
 print(f"log-likelihood at literature theta: {ll_test:.2f}")
 print("(Should be finite and negative; more negative = worse fit)")
 
-
-# ------------------------------------------------------------
 # Run Summary Output
-# ------------------------------------------------------------
 
 summary_file = "[3]_Run_Summary.txt"
 

@@ -14,9 +14,7 @@ import matplotlib.pyplot as plt
 import emcee
 import corner
 
-# ------------------------------------------------------------
 # Plot style
-# ------------------------------------------------------------
 
 plt.rcParams.update({
     "figure.facecolor": "white",
@@ -28,9 +26,7 @@ plt.rcParams.update({
     "legend.framealpha": 1,
 })
 
-# ------------------------------------------------------------
 # Reload data
-# ------------------------------------------------------------
 
 kdwarfs = Table.read("[2]_Gaia_KDwarfs_6D.fits")
 
@@ -38,9 +34,7 @@ z = np.array(kdwarfs["z_mc_med"], dtype=float)
 vz = np.array(kdwarfs["vz_mc_med"], dtype=float)
 z_abs = np.abs(z)
 
-# ------------------------------------------------------------
 # Volume-corrected binning
-# ------------------------------------------------------------
 
 z_bins = np.linspace(0, 1500, 25)
 z_centers = 0.5 * (z_bins[:-1] + z_bins[1:])
@@ -93,9 +87,7 @@ sigma_z = np.array(sigma_z)
 nu_err = np.array(nu_err)
 sigma_z_err = np.array(sigma_z_err)
 
-# ------------------------------------------------------------
 # Fit only reliable z range
-# ------------------------------------------------------------
 
 fit_mask = z_centers <= 400
 
@@ -117,9 +109,7 @@ print(f"Valid bins used: {len(z_obs)}")
 print(f"Fit range: {np.nanmin(z_obs):.1f} to {np.nanmax(z_obs):.1f} pc")
 print(f"Median observed sigma_z: {np.nanmedian(sig_obs):.2f} km/s")
 
-# ------------------------------------------------------------
 # Fixed mass model parameters
-# ------------------------------------------------------------
 
 G_grav = 4.3009e-3
 
@@ -202,9 +192,7 @@ def compute_sigma_z_model(
 
     return sigma_fn(z_centers)
 
-# ------------------------------------------------------------
 # Likelihood and posterior
-# ------------------------------------------------------------
 
 def log_likelihood(theta):
     sigma_top, rho_thin, rho_DM = theta
@@ -260,9 +248,7 @@ def log_posterior(theta):
 
     return lp + ll
 
-# ------------------------------------------------------------
 # MCMC sampling
-# ------------------------------------------------------------
 
 N_DIM = 3
 N_WALKERS = 36
@@ -337,9 +323,7 @@ print(
 print(f"sigma_top median = {sigma_top_med:.2f} km/s")
 print(f"rho_thin median  = {rho_thin_med:.4f} Msun/pc^3")
 
-# ------------------------------------------------------------
 # Physical interpretation plot
-# ------------------------------------------------------------
 
 fig_interp, ax_interp = plt.subplots(figsize=(8, 5))
 
@@ -398,9 +382,7 @@ plt.show()
 
 print("Saved -> [4]_Physical_Interpretation.png")
 
-# ------------------------------------------------------------
 # Posterior predictive check
-# ------------------------------------------------------------
 
 N_PPC = min(200, len(flat_samples))
 ppc_idx = np.random.choice(len(flat_samples), size=N_PPC, replace=False)
@@ -460,9 +442,7 @@ plt.show()
 
 print("Saved -> [4]_Posterior_Predictive_Check.png")
 
-# ------------------------------------------------------------
 # Trace plot
-# ------------------------------------------------------------
 
 param_labels = [
     r"$\sigma_\mathrm{top}$",
@@ -504,9 +484,7 @@ plt.show()
 
 print("Saved -> [4]_MCMC_Traces.png")
 
-# ------------------------------------------------------------
 # Corner plot
-# ------------------------------------------------------------
 
 fig_corner = corner.corner(
     flat_samples,
@@ -529,9 +507,7 @@ plt.show()
 
 print("Saved -> [4]_MCMC_Corner.png")
 
-# ------------------------------------------------------------
 # rho_DM marginal posterior
-# ------------------------------------------------------------
 
 fig_dm, ax_dm = plt.subplots(figsize=(7, 4))
 
@@ -587,9 +563,7 @@ plt.show()
 
 print("Saved -> [4]_rho_DM_Marginal.png")
 
-# ------------------------------------------------------------
 # Summary file
-# ------------------------------------------------------------
 
 summary_file = "[4]_Run_Summary.txt"
 
