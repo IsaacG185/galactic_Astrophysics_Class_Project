@@ -6,10 +6,10 @@
 # or equivalently d [pc] = 1000/varpi [mas]) rather than a Bayesian distance estimator
 # (e.g. Bailer-Jones et al. 2021).
 #
-# Justification: our RUWE < 1.4 and parallax_over_error > 5 cuts guarantee that every
-# star in the sample has a fractional parallax uncertainty sigma_varpi/varpi < 0.2.
+# Justification: our RUWE < 1.4 and parallax_over_error > 10 cuts guarantee that every
+# star in the sample has a fractional parallax uncertainty sigma_varpi/varpi < 0.1.
 # In this high-SNR regime the inverse-parallax estimator is nearly unbiased and its
-# error is well-approximated by  sigma_d / d = sigma_varpi / varpi  (< 20%).
+# error is well-approximated by  sigma_d / d = sigma_varpi / varpi  (< 10%).
 # The Bayesian estimator is essential only when sigma_varpi/varpi > ~0.2, where the
 # asymmetric parallax-to-distance transformation introduces significant bias; that
 # regime was already removed by our quality cuts, so the added complexity of a
@@ -152,7 +152,7 @@ def propagate_mc(n_mc: int, seed: int = 0):
     )
 
 # Main run
-N_MC = 100
+N_MC = 500
 print(f"\nRunning MC with N_MC = {N_MC} draws per star ({N_STARS * N_MC:,} total) ...")
 t0 = time.time()
 z_med, z_std, vz_med, vz_std = propagate_mc(N_MC)
@@ -239,8 +239,8 @@ print("Plot saved -> '[2]_Uncertainty_Propagation.png'")
 #   ν(z) ≈ N(z) / V(z)
 #
 # where N(z) is the number of stars in a bin and V(z) is the effective survey volume.
-# In this analysis, we approximate ν(z) ∝ N(z), i.e. we neglect detailed modeling of
-# the selection function and volume geometry, and treat star counts as a proxy for
+# In this analysis, we approximate V(z) using the geometric volume available inside the d < 1.5 kpc sphere
+# and treat star counts as a proxy for
 # the vertical density profile up to a constant normalization.
 #
 # Justification:
@@ -277,42 +277,50 @@ sigma_z_err = []
 
 N_boot = 200  # bootstrap resamples
 
-for i in range(len(z_bins) - 1):
-    in_bin = (z_abs >= z_bins[i]) & (z_abs < z_bins[i+1])
-    
+d_max = 1500.0   # pc
+
+for i in range(len(z_bins)-1):
+
+    z_lo = z_bins[i]
+    z_hi = z_bins[i+1]
+    z_mid = 0.5*(z_lo+z_hi)
+    dz = z_hi-z_lo
+
+    in_bin = (z_abs >= z_lo) & (z_abs < z_hi)
     vz_bin = vz[in_bin]
     N = len(vz_bin)
-    
-    # Require minimum number of stars for stability
+
     if N < 10:
         nu.append(np.nan)
         sigma_z.append(np.nan)
         nu_err.append(np.nan)
         sigma_z_err.append(np.nan)
         continue
-    
-    # Density proxy
-    nu.append(N)
-    
-    # Velocity dispersion
+
+    # effective survey volume
+    Rmax = np.sqrt(max(d_max**2 - z_mid**2,0))
+    Veff = np.pi * Rmax**2 * dz
+
+    nu.append(N / Veff)
+
     mean_vz = np.mean(vz_bin)
     var_vz = np.mean(vz_bin**2) - mean_vz**2
     sigma = np.sqrt(var_vz)
     sigma_z.append(sigma)
-    
-    # Bootstrap
-    nu_boot = []
-    sig_boot = []
-    
+
+    # bootstrap
+    nu_boot=[]
+    sig_boot=[]
+
     for _ in range(N_boot):
-        sample = np.random.choice(vz_bin, size=N, replace=True)
-        
-        nu_boot.append(len(sample))
-        
-        m = np.mean(sample)
-        v = np.mean(sample**2) - m**2
+        sample=np.random.choice(vz_bin,size=N,replace=True)
+
+        nu_boot.append(len(sample)/Veff)
+
+        m=np.mean(sample)
+        v=np.mean(sample**2)-m**2
         sig_boot.append(np.sqrt(v))
-    
+
     nu_err.append(np.std(nu_boot))
     sigma_z_err.append(np.std(sig_boot))
 
@@ -332,7 +340,7 @@ fig, ax = plt.subplots(1, 2, figsize=(12, 5))
 # Density profile
 ax[0].errorbar(z_centers, nu, yerr=nu_err, fmt='o', markersize=4)
 ax[0].set_xlabel("z [pc]")
-ax[0].set_ylabel("Star counts (proxy for ν(z))")
+ax[0].set_ylabel(r"Volume-corrected tracer density $\nu(z)$ [stars pc$^{-3}$]")
 ax[0].set_title("Vertical Density Profile")
 ax[0].grid(alpha=0.3)
 
@@ -517,3 +525,76 @@ print("Forward model sanity check (literature theta):")
 for z_i, s_obs, s_mod in zip(z_obs, sig_obs, sig_test):
     print(f"  z = {z_i:6.0f} pc   sigma_obs = {s_obs:.2f}   sigma_model = {s_mod:.2f} km/s")
 
+# Save relevant quantities from coordinate transformation, MC propagation,
+# binning, and forward-model sanity check.
+
+summary_file = "[2]_Run_Summary.txt"
+
+finite_zstd = z_std[np.isfinite(z_std)]
+finite_vzstd = vz_std[np.isfinite(vz_std)]
+finite_nu = nu[np.isfinite(nu)]
+finite_sig = sigma_z[np.isfinite(sigma_z)]
+
+with open(summary_file, "w") as f:
+
+    f.write("GAIA DR3 K-DWARF 6D COORDINATE + BINNING SUMMARY\n")
+    f.write("="*70 + "\n\n")
+
+    f.write("--Input Sample--\n")
+    f.write(f"Input file: [1]_Gaia_KDwarfs.fits\n")
+    f.write(f"Number of K-dwarf tracers: {len(kdwarfs):,}\n")
+    f.write(f"Median distance: {np.nanmedian(d_pc):.2f} pc\n")
+    f.write(f"Distance range: {np.nanmin(d_pc):.2f} to {np.nanmax(d_pc):.2f} pc\n\n")
+
+    f.write("--Galactocentric Transformation--\n")
+    f.write(f"R_sun: {R_sun}\n")
+    f.write(f"z_sun: {z_sun}\n")
+    f.write("v_sun: [11.1, 232.24, 7.25] km/s\n")
+    f.write(f"Z range: {np.nanmin(Z):.2f} to {np.nanmax(Z):.2f} pc\n")
+    f.write(f"v_z range: {np.nanmin(v_z):.2f} to {np.nanmax(v_z):.2f} km/s\n")
+    f.write(f"v_z mean: {np.nanmean(v_z):.4f} km/s\n")
+    f.write(f"v_z std: {np.nanstd(v_z):.4f} km/s\n\n")
+
+    f.write("--Monte Carlo Propagation--\n")
+    f.write(f"N_MC main run: {N_MC}\n")
+    f.write(f"Median sigma_z position uncertainty: {np.nanmedian(finite_zstd):.4f} pc\n")
+    f.write(f"Median sigma_v_z uncertainty: {np.nanmedian(finite_vzstd):.4f} km/s\n")
+    f.write("MC convergence test:\n")
+    for nmc, mz, mvz in zip(mc_trials, conv_z, conv_vz):
+        f.write(f"  N_MC={nmc:>4d}: median sigma_z={mz:.4f} pc, median sigma_vz={mvz:.4f} km/s\n")
+    f.write("\n")
+
+    f.write("--Density and Dispersion Binning--\n")
+    f.write(f"z bin range: {z_bins[0]:.1f} to {z_bins[-1]:.1f} pc\n")
+    f.write(f"Number of z bins: {len(z_centers)}\n")
+    f.write(f"Bootstrap resamples: {N_boot}\n")
+    f.write(f"Distance limit used for Veff: d_max = {d_max:.1f} pc\n")
+    f.write(f"Finite bins used: {np.sum(valid)}\n")
+    f.write(f"Median volume-corrected tracer density: {np.nanmedian(finite_nu):.6e} stars/pc^3\n")
+    f.write(f"Median sigma_z profile value: {np.nanmedian(finite_sig):.4f} km/s\n\n")
+
+    f.write("--Forward Model Sanity Check--\n")
+    f.write("Mass model test parameters:\n")
+    f.write(f"  rho_thin  = {theta_test[0]:.4f} Msun/pc^3\n")
+    f.write(f"  h_thin    = {theta_test[1]:.2f} pc\n")
+    f.write(f"  rho_thick = {theta_test[2]:.4f} Msun/pc^3\n")
+    f.write(f"  h_thick   = {theta_test[3]:.2f} pc\n")
+    f.write(f"  rho_DM    = {theta_test[4]:.4f} Msun/pc^3\n")
+    f.write(f"  sigma_model_midplane ≈ {sig_test[0]:.4f} km/s\n\n")
+
+    f.write("Observed vs model sigma_z:\n")
+    for z_i, s_obs, s_err, s_mod in zip(z_obs, sig_obs, sig_err, sig_test):
+        f.write(
+            f"  z={z_i:8.2f} pc   "
+            f"sigma_obs={s_obs:8.4f} +/- {s_err:8.4f}   "
+            f"sigma_model={s_mod:8.4f} km/s\n"
+        )
+    f.write("\n")
+
+    f.write("--Files Produced--\n")
+    f.write("[2]_Gaia_KDwarfs_6D.fits\n")
+    f.write("[2]_Uncertainty_Propagation.png\n")
+    f.write("[2]_Density_Dispersion.png\n")
+    f.write("[2]_Run_Summary.txt\n\n")
+
+print(f"\nSaved run summary -> '{summary_file}'")

@@ -1,0 +1,66 @@
+GAIA DR3 K-DWARF 6D COORDINATE + BINNING SUMMARY
+======================================================================
+
+--Input Sample--
+Input file: [1]_Gaia_KDwarfs.fits
+Number of K-dwarf tracers: 84,327
+Median distance: 367.84 pc
+Distance range: 12.78 to 849.50 pc
+
+--Galactocentric Transformation--
+R_sun: 8.122 kpc
+z_sun: 20.8 pc
+v_sun: [11.1, 232.24, 7.25] km/s
+Z range: -681.54 to 686.80 pc
+v_z range: -152.71 to 309.87 km/s
+v_z mean: -0.7958 km/s
+v_z std: 20.1679 km/s
+
+--Monte Carlo Propagation--
+N_MC main run: 500
+Median sigma_z position uncertainty: 0.7471 pc
+Median sigma_v_z uncertainty: 0.9172 km/s
+MC convergence test:
+  N_MC=  10: median sigma_z=0.6689 pc, median sigma_vz=0.8150 km/s
+  N_MC=  20: median sigma_z=0.7101 pc, median sigma_vz=0.8683 km/s
+  N_MC=  50: median sigma_z=0.7341 pc, median sigma_vz=0.8974 km/s
+  N_MC= 100: median sigma_z=0.7434 pc, median sigma_vz=0.9065 km/s
+  N_MC= 200: median sigma_z=0.7465 pc, median sigma_vz=0.9115 km/s
+
+--Density and Dispersion Binning--
+z bin range: 0.0 to 1500.0 pc
+Number of z bins: 24
+Bootstrap resamples: 200
+Distance limit used for Veff: d_max = 1500.0 pc
+Finite bins used: 11
+Median volume-corrected tracer density: 9.350550e-06 stars/pc^3
+Median sigma_z profile value: 21.1986 km/s
+
+--Forward Model Sanity Check--
+Mass model test parameters:
+  rho_thin  = 0.1000 Msun/pc^3
+  h_thin    = 300.00 pc
+  rho_thick = 0.0200 Msun/pc^3
+  h_thick   = 900.00 pc
+  rho_DM    = 0.0130 Msun/pc^3
+  sigma_model_midplane ≈ 19.8109 km/s
+
+Observed vs model sigma_z:
+  z=   31.25 pc   sigma_obs= 18.9081 +/-   0.1425   sigma_model= 19.8109 km/s
+  z=   93.75 pc   sigma_obs= 19.5269 +/-   0.1569   sigma_model= 19.9560 km/s
+  z=  156.25 pc   sigma_obs= 20.2760 +/-   0.1717   sigma_model= 20.5943 km/s
+  z=  218.75 pc   sigma_obs= 21.1986 +/-   0.2696   sigma_model= 21.9832 km/s
+  z=  281.25 pc   sigma_obs= 21.6027 +/-   0.2677   sigma_model= 23.9430 km/s
+  z=  343.75 pc   sigma_obs= 22.2816 +/-   0.3471   sigma_model= 28.1483 km/s
+  z=  406.25 pc   sigma_obs= 22.8773 +/-   0.4845   sigma_model= 35.9857 km/s
+  z=  468.75 pc   sigma_obs= 22.1924 +/-   0.7706   sigma_model= 53.8931 km/s
+  z=  531.25 pc   sigma_obs= 23.0683 +/-   0.9826   sigma_model= 71.4792 km/s
+  z=  593.75 pc   sigma_obs= 20.9281 +/-   1.9638   sigma_model= 69.7165 km/s
+  z=  656.25 pc   sigma_obs= 18.6921 +/-   2.7978   sigma_model= 67.7888 km/s
+
+--Files Produced--
+[2]_Gaia_KDwarfs_6D.fits
+[2]_Uncertainty_Propagation.png
+[2]_Density_Dispersion.png
+[2]_Run_Summary.txt
+

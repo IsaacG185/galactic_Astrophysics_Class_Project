@@ -1,0 +1,40 @@
+GAIA DR3 LOCAL SAMPLE SUMMARY
+============================================================
+
+--Query--
+Initial stars queried: 1,000,000
+Selection:
+ radial_velocity IS NOT NULL
+ radial_velocity_error < 5 km/s
+ parallax_over_error > 10
+ parallax > 0.667 mas
+ ORDER BY random_index
+
+--RUWE Cleaning--
+RUWE threshold: 1.4
+Before cut: 1,000,000
+After cut : 847,863
+Removed   : 152,137
+Fraction retained: 0.8479
+Median RUWE: 1.0242
+95th percentile RUWE: 3.0945
+
+--Distance Diagnostics--
+Median parallax: 1.4669 mas
+Min parallax   : 0.6670
+Max parallax   : 264.1269
+Median distance: 681.7 pc
+
+--K-Dwarf Tracers--
+Count: 84,327
+RUWE-clean fraction: 0.0995
+Original fraction  : 0.0843
+Median BP-RP: 1.2678
+Median M_G : 6.2866
+
+--Files Produced--
+[1]_Gaia_Data.fits
+[1]_Gaia_Ruwe_Clean.fits
+[1]_Gaia_KDwarfs.fits
+[1]_Ruwe_Distribution.png
+[1]_Tracer_Selection_CMD.png

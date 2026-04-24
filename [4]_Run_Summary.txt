@@ -1,0 +1,49 @@
+MCMC INFERENCE SUMMARY
+======================================================================
+
+--Input--
+Input file: [2]_Gaia_KDwarfs_6D.fits
+Number of stars loaded: 84,327
+Number of likelihood bins: 6
+Fit z range: 31.25 to 343.75 pc
+
+--Fixed Model Assumptions--
+H_THIN_FIXED: 300.00 pc
+RHO_THICK_FIXED: 0.0200 Msun/pc^3
+H_THICK_FIXED: 900.00 pc
+RHO_GAS0: 0.0400 Msun/pc^3
+H_GAS: 150.00 pc
+
+--Priors--
+sigma_top: 5.0 < sigma_top < 45.0 km/s
+rho_thin: 0.085 < rho_thin < 0.115 Msun/pc^3
+rho_DM: 0.0 < rho_DM < 0.06 Msun/pc^3
+Gaussian prior: rho_thin = 0.10 +/- 0.005 Msun/pc^3
+
+--MCMC Settings--
+N_DIM: 3
+N_WALKERS: 36
+N_STEPS: 6000
+N_BURN: 1200
+THIN: 15
+Flat sample shape: (11520, 3)
+
+--Parameter Vector--
+theta = (sigma_top, rho_thin, rho_DM)
+
+--Posterior Medians--
+sigma_top: 23.375020 km/s
+rho_thin:  0.099208 Msun/pc^3
+rho_DM:    0.035425 Msun/pc^3
+
+--rho_DM Result--
+rho_DM = 0.035425 + 0.005888 - 0.005790 Msun/pc^3
+68% credible interval from 16th-84th percentiles.
+
+--Files Produced--
+[4]_Physical_Interpretation.png
+[4]_Posterior_Predictive_Check.png
+[4]_MCMC_Traces.png
+[4]_MCMC_Corner.png
+[4]_rho_DM_Marginal.png
+[4]_Run_Summary.txt

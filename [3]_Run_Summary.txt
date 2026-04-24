@@ -1,0 +1,62 @@
+BINNING + LIKELIHOOD SETUP SUMMARY
+======================================================================
+
+--Input--
+Input file: [2]_Gaia_KDwarfs_6D.fits
+Number of stars loaded: 84,327
+
+--Binning--
+z bin range: 0.0 to 1500.0 pc
+Number of z bins: 24
+Fit mask: z_centers <= 400 pc
+Number of valid likelihood bins: 6
+Fit z range: 31.25 to 343.75 pc
+Bootstrap resamples: 200
+Distance limit for Veff: d_max = 1500.0 pc
+Tracer density method: nu(z) = N(z) / Veff(z)
+Veff(z) approximated using geometric volume inside d < 1.5 kpc sphere.
+
+--Observed Profiles--
+Median nu(z): 3.110055e-05 stars/pc^3
+Median sigma_z: 20.7373 km/s
+Median sigma_z uncertainty: 0.2088 km/s
+z_obs min/max: 31.25 to 343.75 pc
+
+--Fixed Model Assumptions--
+H_THIN_FIXED: 300.00 pc
+RHO_THICK_FIXED: 0.0200 Msun/pc^3
+H_THICK_FIXED: 900.00 pc
+RHO_GAS0: 0.0400 Msun/pc^3
+H_GAS: 150.00 pc
+
+--Forward Model--
+Mass model:
+rho_total = rho_thin sech^2(z/2H_THIN_FIXED)
+          + RHO_THICK_FIXED sech^2(z/2H_THICK_FIXED)
+          + rho_gas + rho_DM
+Jeans solver uses finite top-boundary pressure sigma_top.
+MCMC parameter vector should be:
+  theta = (sigma_top, rho_thin, rho_DM)
+
+--Priors--
+sigma_top: 5.0 < sigma_top < 45.0 km/s
+rho_thin: 0.08 < rho_thin < 0.14 Msun/pc^3
+rho_DM: 0.0 < rho_DM < 0.03 Msun/pc^3
+Weak Gaussian prior: rho_thin = 0.10 +/- 0.02 Msun/pc^3
+
+--Sanity Check--
+sigma_top_test = 22.2816 km/s
+theta_test = (
+  sigma_top = 22.2816 km/s,
+  rho_thin  = 0.1000 Msun/pc^3,
+  rho_DM    = 0.0130 Msun/pc^3
+)
+log-likelihood at theta_test: -123.7738
+
+--Files Produced--
+[3]_Run_Summary.txt
+
+--Notes--
+This file prepares the likelihood functions for [4]_Inference.py.
+This [3] version matches the reduced three-parameter [4] model.
+The six-parameter midplane-boundary version should not be used with the current [4].
