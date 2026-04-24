@@ -1,0 +1,1 @@
+All code is contained in [1]_Data_Acquisition.py, [2]_Coordinate_Transformation.py, [3]_Binning.py, and [4]_Inference.py. All other files sharing one of those numbers were generated in their respective .py file.
